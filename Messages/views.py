@@ -5,7 +5,7 @@ from django.core.paginator import Paginator
 from django.contrib.auth.models import User, Group
 from django.conf import settings
 from django.core.mail import send_mail
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
 
 def main_page(request, page_number=1):
     attention=''
@@ -38,11 +38,16 @@ def user_login(request):
                 login(request, user)
                 return redirect('main')
             else:
-                return redirect('login')
+                return redirect('main/login.html')
         else:
-            return redirect('login')
+            return render(request,'main/login.html')
     else:
         return redirect('main')
+
+
+def user_logout(request):
+    logout(request)
+    return redirect('main')
 
 
 def user_registration(request):
@@ -54,7 +59,7 @@ def user_registration(request):
         group = Group.objects.get(name='users')
         User.objects.get(username=user).groups.add(group)
         user.save()
-        send_email(request, email, user)
+        # send_email(request, email, user)
         return HttpResponse('Message was sent to your email!')
     return render(request, 'main/registration.html')
 

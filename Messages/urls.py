@@ -4,6 +4,7 @@ from Messages import views
 
 urlpatterns = [
     path('login/', views.user_login, name='login'),
+    path('logout/', views.user_logout, name='logout'),
     path('registration/', views.user_registration, name='registration'),
     re_path('^page/(\d+)/$', views.main_page),
     # path('test/', views.test),
