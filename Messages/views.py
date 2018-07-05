@@ -7,8 +7,9 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.contrib.auth import login, authenticate, logout
 
+
 def main_page(request, page_number=1):
-    attention=''
+    attention = ''
     all_articles = UserMessages.objects.all()
     current_page = Paginator(all_articles, 2)
     context = {'articles': current_page.page(page_number), 'attention': attention}
@@ -27,7 +28,7 @@ def main_page(request, page_number=1):
 
 
 def user_login(request):
-    if request.user.is_authenticated == False:
+    if not request.user.is_authenticated:
         name = request.GET.get('user_value', '')
         pasw = request.GET.get('pass_value', '')
         user = authenticate(username=name, password=pasw)
@@ -55,11 +56,11 @@ def user_registration(request):
     pasw = request.GET.get('pass_value','')
     email = request.GET.get('email_value','')
     if user != '' and pasw != '' and email != '':
-        user = User.objects.create_user(user, email, pasw, is_active=1)
+        user = User.objects.create_user(user, email, pasw, is_active=0)
         group = Group.objects.get(name='users')
         User.objects.get(username=user).groups.add(group)
         user.save()
-        # send_email(request, email, user)
+        send_email(request, email, user)
         return HttpResponse('Message was sent to your email!')
     return render(request, 'main/registration.html')
 
