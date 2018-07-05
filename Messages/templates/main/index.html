@@ -44,7 +44,7 @@
         </form>
       </div>
     </nav>
-{#    {% if user.authenticated %}#}
+    {% if user.is_authenticated %}
         {% if attention == 'achtung' %}
             <div class="alert alert-primary" role="alert">
                 Your message is above 250 symbols!
@@ -55,14 +55,15 @@
             <input class="form-control mr-sm-2" type="text" placeholder="message" value="" name="text_message">
             <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Add message</button>
         </form>
+    {% endif %}
 {# Articles start #}
          {% if articles %}
             <ul class="list-group">
                 {% for e in articles %}
-                    <li class="align-right"> {{ e.text }}</li>
+                    <li class="align-right lead container"> {{ e.text }}</li>
                 {% endfor %}
             </ul>
-        {% endif %}
+         {% endif %}
 {# Articles end #}
 {# Pagination start #}
          </div>
@@ -70,28 +71,28 @@
                 <div class="large-3 large-offset-5 columns">
                     <ul class="pagination">
                         {% if articles.has_previous %}
-                            <li class="arrow"><a href="/page/{{ articles.previous_page_number }}/">&laquo;</a></li>
+                            <li class="arrow container"><a href="/page/{{ articles.previous_page_number }}/">&laquo;</a></li>
                         {% else %}
-                            <li class="arrow unavailable"><a href="">&laquo;</a></li>
+                            <li class="arrow unavailable container"><a href="">&laquo;</a></li>
                         {% endif %}
                         {% for page in articles.paginator.page_range %}
                             {% if page == articles.number %}
-                                <li class="current"><a href="/page/{{ page }}/"> {{ page }} </a></li>
+                                <li class="current container"><a href="/page/{{ page }}/"> {{ page }} </a></li>
                             {% else %}
-                                <li><a href="/page/{{ page }}/"> {{ page }} </a></li>
+                                <li class="container"><a href="/page/{{ page }}/"> {{ page }} </a></li>
                             {% endif %}
                         {% endfor %}
                         {% if articles.has_next %}
-                            <li class="arrow"><a href="/page/{{ articles.next_page_number }}/">&raquo;</a></li>
+                            <li class="arrow container"><a href="/page/{{ articles.next_page_number }}/">&raquo;</a></li>
                         {% else %}
-                            <li class="arrow unavailable"><a href="">&raquo;</a></li>
+                            <li class="arrow unavailable container"><a href="">&raquo;</a></li>
                         {% endif %}
                     </ul>
                 </div>
             </div>
 {# pagination end #}
 
-{#    {% endif %}#}
+
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
