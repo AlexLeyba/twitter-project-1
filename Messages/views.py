@@ -6,6 +6,7 @@ from django.contrib.auth.models import User, Group
 from django.conf import settings
 from django.core.mail import send_mail
 from django.contrib.auth import login, authenticate, logout
+import subprocess
 
 
 def main_page(request, page_number=1):
@@ -18,10 +19,12 @@ def main_page(request, page_number=1):
         if text_message != '':
             if len(text_message) >= 250:
                 attention = 'achtung'
+                context = {'articles': current_page.page(page_number), 'attention': attention}
                 return render(request, 'main/index.html', context)
             else:
                 date = datetime.datetime.now().date()
-                i = UserMessages.objects.create(creation_time=date, text=text_message)
+                id = request.user.id
+                i = UserMessages.objects.create(creation_time=date, text=text_message, id_user=id)
                 i.save()
 
     return render(request, 'main/index.html', context)
@@ -39,7 +42,7 @@ def user_login(request):
                 login(request, user)
                 return redirect('main')
             else:
-                return redirect('main/login.html')
+                return render(request, 'main/login.html')
         else:
             return render(request,'main/login.html')
     else:
@@ -80,6 +83,32 @@ def check_from_email(request, login):
     user.save()
     return render(request, 'login')
 
+
+def user_messages(request, id_us, ed=False):
+    all_articles = UserMessages.objects.filter(id_user=id_us)
+
+    context = {
+        'articles': all_articles,
+        'edit': ed
+    }
+    return render(request, 'main/user_page.html', context)
+
+
+def user_messages_edit(request, id_us, ed=True, id_article=None):
+    text = request.GET.get('change_message', '')
+    if text != '':
+        art = UserMessages.objects.get(id=id_article)
+        art.text = text
+        art.save()
+    all_articles = UserMessages.objects.filter(id_user=id_us)
+    text_message = UserMessages.objects.filter(id=id_article).values_list()
+    context = {
+        'articles': all_articles,
+        'edit': ed,
+        'id_article': id_article,
+        'text_message': text_message[0][2]
+    }
+    return render(request, 'main/user_page.html', context)
 
 # def test(request):
 #     # Group.objects.create(name='users')

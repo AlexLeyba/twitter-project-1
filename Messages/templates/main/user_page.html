@@ -44,59 +44,57 @@
         </form>
       </div>
     </nav>
-
-    {% if user.is_authenticated %}
-        {% if attention == 'achtung' %}
-            <div class="alert alert-primary" role="alert">
-                Your message is above 250 symbols!
-            </div>
-        {% endif %}
-
-
-        <form action="" method="get" role="form">
+    {% if edit == 'True' %}
+{#        {% if attention == 'achtung' %}#}
+{#            <div class="alert alert-primary" role="alert">#}
+{#                Your message is above 250 symbols!#}
+{#            </div>#}
+{#        {% endif %}#}
+        <form action="." method="get">
             {% csrf_token %}
-            <input class="form-control mr-sm-2" type="text" placeholder="message" value="" name="text_message">
-            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Add message</button>
+            <input class="form-control mr-sm-2" placeholder="message" value="{{ text_message }}" name="change_message">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Save message</button>
+            <a class="btn btn-outline-dark my-2 my-sm-0" href="http://127.0.0.1:8000/user/{{ user.id }}">Reset</a>
         </form>
-
     {% endif %}
 {# Articles start #}
          {% if articles %}
             <ul class="list-group">
                 {% for e in articles %}
                     <li class="align-right lead container">
-                        {{ e.text }} <br>
-                        like here and count
+                        {{ e.text }}
+                        <a href="http://127.0.0.1:8000/user_edit/{{ user.id }}/{{ True }}/{{ e.id }} "  class="">Edit</a>
+
                     </li>
                 {% endfor %}
             </ul>
          {% endif %}
 {# Articles end #}
 {# Pagination start #}
-         </div>
-            <div class="pagination">
-                <div class="large-3 large-offset-5 columns">
-                    <ul class="pagination">
-                        {% if articles.has_previous %}
-                            <li class="arrow container"><a href="/page/{{ articles.previous_page_number }}/">&laquo;</a></li>
-                        {% else %}
-                            <li class="arrow unavailable container"><a href="">&laquo;</a></li>
-                        {% endif %}
-                        {% for page in articles.paginator.page_range %}
-                            {% if page == articles.number %}
-                                <li class="current container"><a href="/page/{{ page }}/"> {{ page }} </a></li>
-                            {% else %}
-                                <li class="container"><a href="/page/{{ page }}/"> {{ page }} </a></li>
-                            {% endif %}
-                        {% endfor %}
-                        {% if articles.has_next %}
-                            <li class="arrow container"><a href="/page/{{ articles.next_page_number }}/">&raquo;</a></li>
-                        {% else %}
-                            <li class="arrow unavailable container"><a href="">&raquo;</a></li>
-                        {% endif %}
-                    </ul>
-                </div>
-            </div>
+{#         </div>#}
+{#            <div class="pagination">#}
+{#                <div class="large-3 large-offset-5 columns">#}
+{#                    <ul class="pagination">#}
+{#                        {% if articles.has_previous %}#}
+{#                            <li class="arrow container"><a href="/page/{{ articles.previous_page_number }}/">&laquo;</a></li>#}
+{#                        {% else %}#}
+{#                            <li class="arrow unavailable container"><a href="">&laquo;</a></li>#}
+{#                        {% endif %}#}
+{#                        {% for page in articles.paginator.page_range %}#}
+{#                            {% if page == articles.number %}#}
+{#                                <li class="current container"><a href="/page/{{ page }}/"> {{ page }} </a></li>#}
+{#                            {% else %}#}
+{#                                <li class="container"><a href="/page/{{ page }}/"> {{ page }} </a></li>#}
+{#                            {% endif %}#}
+{#                        {% endfor %}#}
+{#                        {% if articles.has_next %}#}
+{#                            <li class="arrow container"><a href="/page/{{ articles.next_page_number }}/">&raquo;</a></li>#}
+{#                        {% else %}#}
+{#                            <li class="arrow unavailable container"><a href="">&raquo;</a></li>#}
+{#                        {% endif %}#}
+{#                    </ul>#}
+{#                </div>#}
+{#            </div>#}
 {# pagination end #}
 
 
