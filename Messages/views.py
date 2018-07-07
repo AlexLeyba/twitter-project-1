@@ -1,18 +1,25 @@
 from django.shortcuts import render, redirect, HttpResponse
-from Messages.models import UserMessages
-import datetime
+from Messages.models import UserMessages, Likes
 from django.core.paginator import Paginator
 from django.contrib.auth.models import User, Group
 from django.conf import settings
 from django.core.mail import send_mail
 from django.contrib.auth import login, authenticate, logout
 import subprocess
+import datetime
+from pandas import *
 
 
 def main_page(request, page_number=1):
     attention = ''
-    all_articles = UserMessages.objects.all()
-    current_page = Paginator(all_articles, 2)
+    calculate_likes()
+    like = get_conf_likes(request)
+    edit = get_edit_art(request)
+    all = UserMessages.objects.all()
+
+    obj_list = get_big_arr(like, edit, all)
+    current_page = Paginator(obj_list, 2)
+    print(current_page)
     context = {'articles': current_page.page(page_number), 'attention': attention}
     if request.user.is_authenticated:
         text_message = request.GET.get('text_message', '')
@@ -22,9 +29,9 @@ def main_page(request, page_number=1):
                 context = {'articles': current_page.page(page_number), 'attention': attention}
                 return render(request, 'main/index.html', context)
             else:
-                date = datetime.datetime.now().date()
+                date = datetime.now().date()
                 id = request.user.id
-                i = UserMessages.objects.create(creation_time=date, text=text_message, id_user=id)
+                i = UserMessages.objects.create(creation_time=date, text=text_message, id_user=id, total_likes=0, retweet=False)
                 i.save()
 
     return render(request, 'main/index.html', context)
@@ -109,6 +116,88 @@ def user_messages_edit(request, id_us, ed=True, id_article=None):
         'text_message': text_message[0][2]
     }
     return render(request, 'main/user_page.html', context)
+
+
+def user_add_like(request, id_article):
+    try:
+        id_u = request.user.id
+        i = Likes.objects.get(id_user=id_u, id_article=id_article)
+        if not i.like:
+            i.like = True
+        else:
+            i.like = False
+        i.save()
+    except:
+        Likes.objects.create(id_user=id_u, id_article=id_article, like=True)
+    return redirect('/')
+
+
+def calculate_likes():
+    all_likes = UserMessages.objects.all()
+    for e in all_likes:
+        try:
+            number = Likes.objects.filter(id_article=e.id, like=True).count()
+            e.total_likes = number
+            e.save()
+        except:
+            number = 0
+            e.total_likes = number
+            e.save()
+
+
+def get_conf_likes(request):
+    array=[]
+    all_articles = UserMessages.objects.all()
+    for e in all_articles:
+        try:
+            obj = Likes.objects.get(id_article=e.id, id_user=request.user.id)
+            array.append(obj.like)
+        except:
+            array.append(False)
+
+    return array
+
+
+def get_edit_art(request):
+    array=[]
+    all_articles = UserMessages.objects.all()
+    id_user = request.user.id
+    for e in all_articles:
+        if e.id_user != id_user and request.user.is_authenticated == True:
+            array.append(True)
+        else:
+            array.append(False)
+
+    return array
+
+
+def get_big_arr(like, edit, all):
+    main_array = []
+    for e in range(len(like)):
+        array = []
+        array.append(all[e].text)
+        array.append(all[e].id)
+        array.append(all[e].id_user)
+        array.append(like[e])
+        array.append(edit[e])
+        array.append(all[e].total_likes)
+        array.append((all[e].retweet))
+        main_array.append(array)
+
+    return main_array
+
+
+def user_retweet(request, id_article, id_creater):
+    id_user = request.user.id
+    user = str(request.user)
+    date = datetime.now().date()
+    mess = UserMessages.objects.get(id=id_article, id_user=id_creater)
+    text = 'User ' + user + ' retweeted: "' + mess.text +'"'
+    i = UserMessages.objects.create(creation_time=date, text=text, id_user=id_user, total_likes=0, retweet=True)
+    i.save()
+    return redirect('/')
+
+
 
 # def test(request):
 #     # Group.objects.create(name='users')
