@@ -5,9 +5,8 @@ from django.contrib.auth.models import User, Group
 from django.conf import settings
 from django.core.mail import send_mail
 from django.contrib.auth import login, authenticate, logout
-import subprocess
 import datetime
-from pandas import *
+import asyncio
 
 
 def main_page(request, page_number=1):
@@ -67,28 +66,31 @@ def user_registration(request):
     email = request.GET.get('email_value','')
     if user != '' and pasw != '' and email != '':
         user = User.objects.create_user(user, email, pasw, is_active=0)
-        group = Group.objects.get(name='users')
-        User.objects.get(username=user).groups.add(group)
+        # group = Group.objects.get(name='users')
+        # User.objects.get(username=user).groups.add(group)
         user.save()
-        send_email(request, email, user)
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(send_email(request, email, user))
+        loop.close()
         return HttpResponse('Message was sent to your email!')
     return render(request, 'main/registration.html')
 
 
-def send_email(request, email, user):
+async def send_email(request, email, user):
     subject = 'Thank you'
-    message = 'http://127.0.0.1:8000/email_conf/' + user + '/'
+    message = 'http://127.0.0.1:8000/email_conf/' + str(user) + '/'
     from_email = settings.EMAIL_HOST_USER
     to_list = [email]
-    send_mail(subject, message, from_email, to_list)
+    send_mail(subject, message, from_email, to_list, fail_silently=False)
     return HttpResponse('Message was sent to your email!')
 
 
-def check_from_email(request, login):
-    user = User.objects.get(username=login)
+def check_from_email(request, user):
+    user = User.objects.get(username=user)
     user.is_active = 1
     user.save()
-    return render(request, 'login')
+    return redirect('login')
 
 
 def user_messages(request, id_us, ed=False):
@@ -198,8 +200,18 @@ def user_retweet(request, id_article, id_creater):
     return redirect('/')
 
 
-
+# async def say(what, when):
+#     # await asyncio.sleep(when)
+#     print(what)
+#
 # def test(request):
 #     # Group.objects.create(name='users')
 #     # Group.objects.create(name='admin')
+#     loop = asyncio.new_event_loop()
+#     asyncio.set_event_loop(loop)
+#     loop.run_until_complete(say('hello', 0))
+#     loop.close()
 #     return render(request, 'test.html')
+
+
+
