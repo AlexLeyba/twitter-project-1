@@ -12,7 +12,7 @@
     <link href="/static/starter-template.css" rel="stylesheet">
   </head>
 
-  <body>
+  <body class="bg-light">
     <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
       <a class="navbar-brand" href="#">Navbar</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,31 +45,48 @@
         </form>
       </div>
     </nav>
-    {% if edit == 'True' %}
-{#        {% if attention == 'achtung' %}#}
-{#            <div class="alert alert-primary" role="alert">#}
-{#                Your message is above 250 symbols!#}
-{#            </div>#}
-{#        {% endif %}#}
-        <form action="." method="get">
-            {% csrf_token %}
-            <input class="form-control mr-sm-2" placeholder="message" value="{{ text_message }}" name="change_message">
-            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Save message</button>
-            <a class="btn btn-outline-dark my-2 my-sm-0" href="http://127.0.0.1:8000/user/{{ user.id }}">Reset</a>
-        </form>
-    {% endif %}
-{# Articles start #}
-         {% if articles %}
-            <ul class="list-group">
-                {% for e in articles %}
-                    <li class="align-right lead container">
-                        {{ e.text }}
-                        <a href="http://127.0.0.1:8000/user_edit/{{ user.id }}/{{ True }}/{{ e.id }}"  class=""><i class="fas fa-pen"></i></a>
 
-                    </li>
-                {% endfor %}
-            </ul>
-         {% endif %}
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                {% if edit == 'True' %}
+            {#        {% if attention == 'achtung' %}#}
+            {#            <div class="alert alert-primary" role="alert">#}
+            {#                Your message is above 250 symbols!#}
+            {#            </div>#}
+            {#        {% endif %}#}
+                    <div style="margin-bottom: 15px">
+                        <form action="." method="get">
+                            {% csrf_token %}
+                            <div style="margin-bottom: 10px;">
+                                <input class="form-control mr-sm-2" placeholder="message" value="{{ text_message }}" name="change_message">
+                            </div>
+                            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Save message</button>
+                            <a class="btn btn-outline-dark my-2 my-sm-0" href="http://127.0.0.1:8000/user/{{ user.id }}">Reset</a>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{# Articles start #}
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-12">
+                 {% if articles %}
+                    <ul class="list-group list-group-flush">
+                        {% for e in articles %}
+                            <li class="list-group-item">
+                                {{ e.text }}
+                                <a href="http://127.0.0.1:8000/user_edit/{{ user.id }}/{{ True }}/{{ e.id }}"  class=""><i class="fas fa-pen"></i></a>
+
+                            </li>
+                        {% endfor %}
+                    </ul>
+                 {% endif %}
+                </div>
+            </div>
+        </div>
 {# Articles end #}
 {# Pagination start #}
 {#         </div>#}
