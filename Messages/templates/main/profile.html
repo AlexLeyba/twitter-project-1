@@ -1,0 +1,19 @@
+{% extends 'main/template.html' %}
+
+{% block content %}
+    {% if attention == 'achtung'%}
+        <div class="alert alert-danger" role="alert">
+            First symbols can not be numbers!
+        </div>
+    {% endif %}
+
+
+
+    <div class="" style="margin: 20px; padding: 20px;">
+        <h3 class="font-weight-bold">Change your name</h3>
+        <form action="">
+            <input type="text" placeholder="Your name" name="name" value="{{ name }}" class="mr-sm-2">
+            <input type="submit" value="Change Name" class="btn btn-primary">
+        </form>
+    </div>
+{% endblock %}

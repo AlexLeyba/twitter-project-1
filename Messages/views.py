@@ -226,12 +226,29 @@ def message(request, id_article):
 
 
 def profile(request, id_user):
+    first_letter = ''
+    field_name = request.GET.get('name', '')
+    user = User.objects.get(id=id_user)
+    username = user.username
+
+    if field_name != '':
+        first_letter = is_int(field_name[0])
+        if first_letter != 'achtung':
+            user.username = field_name
+            user.save()
+
+    context = {
+        'name': username,
+        'attention': first_letter,
+    }
+    return render(request, 'main/profile.html', context)
 
 
-
-
-
-    return render(request, '')
+def is_int(letter):
+    for x in range(10):
+        if letter == str(x):
+            return 'achtung'
+    return 'pass'
 # async def say(what, when):
 #     # await asyncio.sleep(when)
 #     print(what)

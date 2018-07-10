@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="/static/offcanvas.css" >
   </head>
 
-  <body class="bg-dark">
+  <body class="bg-light">
     <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
       <a class="navbar-brand" href="#">Navbar</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,6 +36,9 @@
           {% if user.is_authenticated %}
               <li class="nav-item">
                 <a class="nav-link" href="http://127.0.0.1:8000/user/{{ user.id }}">Hello {{ user }}</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="http://127.0.0.1:8000/profile/{{ user.id }}">Profile</a>
               </li>
           {% endif %}
         </ul>
