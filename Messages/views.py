@@ -217,6 +217,10 @@ def message(request, id_article):
     text_message = mess.get(id=id_article).text
     id_user = mess.get(id=id_article).id_user
     user_name = User.objects.get(id=id_user).username
+
+    if user_name == '':
+        user_name = 'Anonimus'
+
     context = {
         'message': text_message,
         'username': user_name,
