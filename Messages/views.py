@@ -5,8 +5,9 @@ from django.contrib.auth.models import User, Group
 from django.conf import settings
 from django.core.mail import send_mail
 from django.contrib.auth import login, authenticate, logout
-import datetime
+from _datetime import datetime
 import asyncio
+from django.db import connection
 
 
 def main_page(request, page_number=1):
@@ -66,8 +67,8 @@ def user_registration(request):
     email = request.GET.get('email_value','')
     if user != '' and pasw != '' and email != '':
         user = User.objects.create_user(user, email, pasw, is_active=0)
-        # group = Group.objects.get(name='users')
-        # User.objects.get(username=user).groups.add(group)
+        group = Group.objects.get(name='users')
+        User.objects.get(username=user).groups.add(group)
         user.save()
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
@@ -121,16 +122,17 @@ def user_messages_edit(request, id_us, ed=True, id_article=None):
 
 
 def user_add_like(request, id_article):
-    try:
-        id_u = request.user.id
-        i = Likes.objects.get(id_user=id_u, id_article=id_article)
-        if not i.like:
-            i.like = True
-        else:
-            i.like = False
-        i.save()
-    except:
-        Likes.objects.create(id_user=id_u, id_article=id_article, like=True)
+    if request.user.is_authenticated:
+        try:
+            id_u = request.user.id
+            i = Likes.objects.get(id_user=id_u, id_article=id_article)
+            if not i.like:
+                i.like = True
+            else:
+                i.like = False
+            i.save()
+        except:
+            Likes.objects.create(id_user=id_u, id_article=id_article, like=True)
     return redirect('/')
 
 
@@ -200,6 +202,36 @@ def user_retweet(request, id_article, id_creater):
     return redirect('/')
 
 
+def message(request, id_article):
+    answer = request.GET.get('answer', '')
+    mess = UserMessages.objects
+    if answer != '' and len(answer) <= 250:
+        id_article = int(id_article)
+        date = datetime.now().date()
+        id_user = request.user.id
+        mess.create(creation_time=date, text=answer, id_user=id_user, total_likes=0, retweet=False, id_answer=id_article)
+
+    cursor = connection.cursor()
+    cursor.execute("SELECT tw.id, tw.text, us.username FROM twitter.user_messages AS tw INNER JOIN twitter.auth_user AS us ON tw.id_user = us.id WHERE tw.id_answer=" + str(id_article))
+
+    text_message = mess.get(id=id_article).text
+    id_user = mess.get(id=id_article).id_user
+    user_name = User.objects.get(id=id_user).username
+    context = {
+        'message': text_message,
+        'username': user_name,
+        'cursor': cursor,
+    }
+    return render(request, 'main/message.html', context)
+
+
+def profile(request, id_user):
+
+
+
+
+
+    return render(request, '')
 # async def say(what, when):
 #     # await asyncio.sleep(when)
 #     print(what)

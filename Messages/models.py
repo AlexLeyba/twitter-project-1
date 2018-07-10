@@ -7,6 +7,7 @@ class UserMessages(models.Model):
     id_user = models.IntegerField(default=0)
     total_likes = models.IntegerField(default=0)
     retweet = models.BooleanField(default=False)
+    id_answer = models.IntegerField(default=0)
 
     class Meta:
         db_table = 'user_messages'

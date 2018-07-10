@@ -12,5 +12,7 @@ urlpatterns = [
     re_path('^user_edit/(?P<id_us>\w+)/(?P<ed>\w+)/(?P<id_article>\w+)/$', views.user_messages_edit, name="user_edit"),
     re_path('^user_add_like/(?P<id_article>\w+)/$', views.user_add_like, name="user_add_article"),
     re_path('^user_retweet/(?P<id_article>\w+)/(?P<id_creater>\w+)/$',views.user_retweet, name="user_retweet"),
+    re_path('^message/(?P<id_article>\w+)/$', views.message, name="message"),
+    re_path('^profile/(?P<id_user>\w+)$', views.profile, name="profile"),
     # path('test/', views.test),
 ]

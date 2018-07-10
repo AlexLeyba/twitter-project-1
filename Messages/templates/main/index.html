@@ -37,6 +37,9 @@
               <li class="nav-item">
                 <a class="nav-link" href="http://127.0.0.1:8000/user/{{ user.id }}">Hello {{ user }}</a>
               </li>
+              <li class="nav-item">
+                <a class="nav-link" href="http://127.0.0.1:8000/profile/{{ user.id }}">Profile</a>
+              </li>
           {% endif %}
         </ul>
         <form class="form-inline my-2 my-lg-0">
@@ -93,8 +96,8 @@
                                     {% endif %}
 
                                     {{ e.5 }}
+                                    <a href="http://127.0.0.1:8000/message/{{ e.1 }}/">Answer</a>
                                 </li>
-            {#                    {% endfor %}#}
                             {% endfor %}
                         </ul>
                      {% endif %}
