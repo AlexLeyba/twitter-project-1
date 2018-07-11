@@ -213,17 +213,33 @@ def user_retweet(request, id_article, id_creater):
 
 
 def message(request, id_article):
+
     answer = request.GET.get('answer', '')
     mess = UserMessages.objects
+    cursor = connection.cursor()
+
+    try:
+        left = mess.filter(id_answer=id_article).aggregate(Max('left'))['left__max']
+    except:
+        left = mess.filter(id=id_article).aggregate(Max('left'))['left__max']
+
+    print(left)
+
     if answer != '' and len(answer) <= 250:
         id_article = int(id_article)
         date = datetime.now().date()
         id_user = request.user.id
-        mess.create(creation_time=date, text=answer, id_user=id_user, total_likes=0, retweet=False, id_answer=id_article)
+        num = left + 1
+        cursor.execute("UPDATE `user_messages` SET `left` = `left` + 2 WHERE `left` >= " + str(num))
+        cursor.execute("UPDATE `user_messages` SET `right` = `right` + 2 WHERE `right` >= " + str(num))
+
+        mess.create(creation_time=date, text=answer, id_user=id_user,
+                    total_likes=0, retweet=False, id_answer=id_article,
+                    left=left + 1, right=left + 2)
 
     left = mess.get(id=id_article).left
     right = mess.get(id=id_article).right
-    cursor = connection.cursor()
+
     cursor.execute("SELECT ms.id, ms.text, us.username " +
                    "FROM twitter.user_messages AS ms " +
                    "INNER JOIN twitter.auth_user AS us ON ms.id_user = us.id " +
@@ -243,7 +259,11 @@ def message(request, id_article):
         'username': user_name,
         'cursor': cursor,
     }
-    return render(request, 'main/message.html', context)
+
+    if answer != '':
+        return redirect('http://127.0.0.1:8000/message/' + str(id_article))
+    else:
+        return render(request, 'main/message.html', context)
 
 
 def profile(request, id_user):
