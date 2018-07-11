@@ -211,8 +211,15 @@ def message(request, id_article):
         id_user = request.user.id
         mess.create(creation_time=date, text=answer, id_user=id_user, total_likes=0, retweet=False, id_answer=id_article)
 
+    left = mess.get(id=id_article).left
+    right = mess.get(id=id_article).right
     cursor = connection.cursor()
-    cursor.execute("SELECT tw.id, tw.text, us.username FROM twitter.user_messages AS tw INNER JOIN twitter.auth_user AS us ON tw.id_user = us.id WHERE tw.id_answer=" + str(id_article))
+    cursor.execute("SELECT ms.id, ms.text, us.username " +
+                   "FROM twitter.user_messages AS ms " +
+                   "INNER JOIN twitter.auth_user AS us ON ms.id_user = us.id " +
+                   "WHERE ms.id_answer=" + str(id_article) +
+                    " AND ms.left > " + str(left) +
+                    " AND ms.right < " + str(right))
 
     text_message = mess.get(id=id_article).text
     id_user = mess.get(id=id_article).id_user
