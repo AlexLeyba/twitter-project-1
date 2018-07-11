@@ -8,6 +8,7 @@ from django.contrib.auth import login, authenticate, logout
 from _datetime import datetime
 import asyncio
 from django.db import connection
+from django.db.models import Q, Max
 
 
 def main_page(request, page_number=1):
@@ -15,12 +16,11 @@ def main_page(request, page_number=1):
     calculate_likes()
     like = get_conf_likes(request)
     edit = get_edit_art(request)
-    all = UserMessages.objects.all()
+    all = UserMessages.objects.filter(~Q(id_user=0))
 
     obj_list = get_big_arr(like, edit, all)
     current_page = Paginator(obj_list, 2)
-    print(current_page)
-    context = {'articles': current_page.page(page_number), 'attention': attention}
+
     if request.user.is_authenticated:
         text_message = request.GET.get('text_message', '')
         if text_message != '':
@@ -31,9 +31,19 @@ def main_page(request, page_number=1):
             else:
                 date = datetime.now().date()
                 id = request.user.id
-                i = UserMessages.objects.create(creation_time=date, text=text_message, id_user=id, total_likes=0, retweet=False)
-                i.save()
+                # print(all.aggregate(Max('right'))['right__max'])
+                right = int(all.aggregate(Max('right'))['right__max']) + 2
+                left = right - 1
 
+                i = UserMessages.objects.create(creation_time=date, text=text_message,
+                                                id_user=id, total_likes=0, retweet=False,
+                                                left=left, right=right)
+                i.save()
+                user = UserMessages.objects.get(id_user=0)
+                user.right = user.right + 2
+                user.save()
+
+    context = {'articles': current_page.page(page_number), 'attention': attention}
     return render(request, 'main/index.html', context)
 
 
@@ -151,7 +161,7 @@ def calculate_likes():
 
 def get_conf_likes(request):
     array=[]
-    all_articles = UserMessages.objects.all()
+    all_articles = UserMessages.objects.filter(~Q(id_user=0))
     for e in all_articles:
         try:
             obj = Likes.objects.get(id_article=e.id, id_user=request.user.id)
@@ -164,7 +174,7 @@ def get_conf_likes(request):
 
 def get_edit_art(request):
     array=[]
-    all_articles = UserMessages.objects.all()
+    all_articles = UserMessages.objects.filter(~Q(id_user=0))
     id_user = request.user.id
     for e in all_articles:
         if e.id_user != id_user and request.user.is_authenticated == True:
