@@ -46,3 +46,55 @@ async def send_email(request, email, user):
     send_mail(subject, message, from_email, to_list, fail_silently=False)
     return HttpResponse('Message was sent to your email!')
 
+
+def get_big_arr(like, edit, all):
+    main_array = []
+    for e in range(len(like)):
+        array = []
+        array.append(all[e].text)
+        array.append(all[e].id)
+        array.append(all[e].id_user)
+        array.append(like[e])
+        array.append(edit[e])
+        array.append(all[e].total_likes)
+        array.append((all[e].retweet))
+        main_array.append(array)
+
+    return main_array
+
+
+def calculate_likes():
+    all_likes = UserMessages.objects.all()
+    for e in all_likes:
+        try:
+            number = Likes.objects.filter(id_article=e.id, like=True).count()
+        except:
+            number = 0
+        e.total_likes = number
+        e.save()
+
+
+def get_conf_likes(request):
+    array=[]
+    all_articles = UserMessages.objects.filter(~Q(id_user=0))
+    for e in all_articles:
+        try:
+            obj = Likes.objects.get(id_article=e.id, id_user=request.user.id)
+            array.append(obj.like)
+        except:
+            array.append(False)
+
+    return array
+
+
+def get_edit_art(request):
+    array = []
+    all_articles = UserMessages.objects.filter(~Q(id_user=0))
+    id_user = request.user.id
+    for e in all_articles:
+        if e.id_user != id_user and request.user.is_authenticated == True:
+            array.append(True)
+        else:
+            array.append(False)
+
+    return array
