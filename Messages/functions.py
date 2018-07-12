@@ -98,3 +98,23 @@ def get_edit_art(request):
             array.append(False)
 
     return array
+
+
+def create_message(request, answer, mess, id_article):
+    cursor = connection.cursor()
+    left = mess.filter(id_answer=id_article).aggregate(Max('left'))['left__max']
+
+    if left == None:
+        left = mess.filter(id=id_article).aggregate(Max('left'))['left__max']
+
+    if answer != '' and len(answer) <= 250:
+        id_article = int(id_article)
+        date = datetime.now().date()
+        id_user = request.user.id
+        num = int(left) + 1
+        cursor.execute("UPDATE `user_messages` SET `left` = `left` + 2 WHERE `left` >= " + str(num))
+        cursor.execute("UPDATE `user_messages` SET `right` = `right` + 2 WHERE `right` >= " + str(num))
+
+        mess.create(creation_time=date, text=answer, id_user=id_user,
+                    total_likes=0, retweet=False, id_answer=id_article,
+                    left=left + 1, right=left + 2)
