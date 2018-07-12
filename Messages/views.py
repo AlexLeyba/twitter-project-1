@@ -9,6 +9,7 @@ from _datetime import datetime
 import asyncio
 from django.db import connection
 from django.db.models import Q, Max
+from Messages.functions import *
 
 
 def main_page(request, page_number=1):
@@ -19,7 +20,7 @@ def main_page(request, page_number=1):
     all = UserMessages.objects.filter(~Q(id_user=0))
 
     obj_list = get_big_arr(like, edit, all)
-    current_page = Paginator(obj_list, 2)
+    current_page = Paginator(obj_list, 4)
 
     if request.user.is_authenticated:
         text_message = request.GET.get('text_message', '')
@@ -29,19 +30,8 @@ def main_page(request, page_number=1):
                 context = {'articles': current_page.page(page_number), 'attention': attention}
                 return render(request, 'main/index.html', context)
             else:
-                date = datetime.now().date()
-                id = request.user.id
-                # print(all.aggregate(Max('right'))['right__max'])
-                right = int(all.aggregate(Max('right'))['right__max']) + 2
-                left = right - 1
+                add_new_message(request, text_message)
 
-                i = UserMessages.objects.create(creation_time=date, text=text_message,
-                                                id_user=id, total_likes=0, retweet=False,
-                                                left=left, right=right)
-                i.save()
-                user = UserMessages.objects.get(id_user=0)
-                user.right = user.right + 2
-                user.save()
 
     context = {'articles': current_page.page(page_number), 'attention': attention}
     return render(request, 'main/index.html', context)
@@ -88,19 +78,11 @@ def user_registration(request):
     return render(request, 'main/registration.html')
 
 
-async def send_email(request, email, user):
-    subject = 'Thank you'
-    message = 'http://127.0.0.1:8000/email_conf/' + str(user) + '/'
-    from_email = settings.EMAIL_HOST_USER
-    to_list = [email]
-    send_mail(subject, message, from_email, to_list, fail_silently=False)
-    return HttpResponse('Message was sent to your email!')
-
-
 def check_from_email(request, user):
     user = User.objects.get(username=user)
     user.is_active = 1
     user.save()
+
     return redirect('login')
 
 
@@ -111,6 +93,7 @@ def user_messages(request, id_us, ed=False):
         'articles': all_articles,
         'edit': ed
     }
+
     return render(request, 'main/user_page.html', context)
 
 
@@ -122,12 +105,14 @@ def user_messages_edit(request, id_us, ed=True, id_article=None):
         art.save()
     all_articles = UserMessages.objects.filter(id_user=id_us)
     text_message = UserMessages.objects.filter(id=id_article).values_list()
+
     context = {
         'articles': all_articles,
         'edit': ed,
         'id_article': id_article,
         'text_message': text_message[0][2]
     }
+
     return render(request, 'main/user_page.html', context)
 
 
@@ -143,6 +128,7 @@ def user_add_like(request, id_article):
             i.save()
         except:
             Likes.objects.create(id_user=id_u, id_article=id_article, like=True)
+
     return redirect('/')
 
 
@@ -151,12 +137,10 @@ def calculate_likes():
     for e in all_likes:
         try:
             number = Likes.objects.filter(id_article=e.id, like=True).count()
-            e.total_likes = number
-            e.save()
         except:
             number = 0
-            e.total_likes = number
-            e.save()
+        e.total_likes = number
+        e.save()
 
 
 def get_conf_likes(request):
@@ -173,7 +157,7 @@ def get_conf_likes(request):
 
 
 def get_edit_art(request):
-    array=[]
+    array = []
     all_articles = UserMessages.objects.filter(~Q(id_user=0))
     id_user = request.user.id
     for e in all_articles:
@@ -202,18 +186,14 @@ def get_big_arr(like, edit, all):
 
 
 def user_retweet(request, id_article, id_creater):
-    id_user = request.user.id
     user = str(request.user)
-    date = datetime.now().date()
     mess = UserMessages.objects.get(id=id_article, id_user=id_creater)
-    text = 'User ' + user + ' retweeted: "' + mess.text +'"'
-    i = UserMessages.objects.create(creation_time=date, text=text, id_user=id_user, total_likes=0, retweet=True)
-    i.save()
+    text_message = 'User ' + user + ' retweeted: "' + mess.text + '"'
+    add_new_message(request, text_message, id_article)
     return redirect('/')
 
 
 def message(request, id_article):
-
     answer = request.GET.get('answer', '')
     mess = UserMessages.objects
     cursor = connection.cursor()
@@ -222,8 +202,6 @@ def message(request, id_article):
         left = mess.filter(id_answer=id_article).aggregate(Max('left'))['left__max']
     except:
         left = mess.filter(id=id_article).aggregate(Max('left'))['left__max']
-
-    print(left)
 
     if answer != '' and len(answer) <= 250:
         id_article = int(id_article)
@@ -283,25 +261,3 @@ def profile(request, id_user):
         'attention': first_letter,
     }
     return render(request, 'main/profile.html', context)
-
-
-def is_int(letter):
-    for x in range(10):
-        if letter == str(x):
-            return 'achtung'
-    return 'pass'
-# async def say(what, when):
-#     # await asyncio.sleep(when)
-#     print(what)
-#
-# def test(request):
-#     # Group.objects.create(name='users')
-#     # Group.objects.create(name='admin')
-#     loop = asyncio.new_event_loop()
-#     asyncio.set_event_loop(loop)
-#     loop.run_until_complete(say('hello', 0))
-#     loop.close()
-#     return render(request, 'test.html')
-
-
-
