@@ -35,10 +35,11 @@
           {% endif %}
           {% if user.is_authenticated %}
               <li class="nav-item">
-                <a class="nav-link" href="http://127.0.0.1:8000/user/{{ user.id }}">Hello {{ user }}</a>
+{#                <a class="nav-link" href="http://127.0.0.1:8000/user/{{ user.id }}">Hello {{ user }}</a>#}
+                <a class="nav-link" href="{% url 'user_messages' user.id %}">Hello {{ user }}</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="http://127.0.0.1:8000/profile/{{ user.id }}">Profile</a>
+                <a class="nav-link" href="{% url 'profile' user.id %}">Profile</a>
               </li>
           {% endif %}
         </ul>
@@ -87,16 +88,16 @@
                                         <div class="text-muted">{{ e.0 }}</div>
                                     {% endif %}
                                     {% if e.4 %}
-                                        <a href="http://127.0.0.1:8000/user_retweet/{{ e.1 }}/{{ e.2 }}/"><i class="fas fa-retweet"></i></a>
+                                        <a href="{% url 'user_retweet' e.1 e.2  %}"><i class="fas fa-retweet"></i></a>
                                     {% endif %}
                                     {% if e.3 %}
-                                        <a href="http://127.0.0.1:8000/user_add_like/{{ e.1 }}/"><i class="fas fa-heart"></i></a>
+                                        <a href="{% url 'user_add_like' e.1 %}"><i class="fas fa-heart"></i></a>
                                     {% else %}
-                                        <a href="http://127.0.0.1:8000/user_add_like/{{ e.1 }}/"><i class="far fa-heart"></i></a>
+                                        <a href="{% url 'user_add_like' e.1 %}"><i class="far fa-heart"></i></a>
                                     {% endif %}
 
                                     {{ e.5 }}
-                                    <a href="http://127.0.0.1:8000/message/{{ e.1 }}/"><i class="far fa-comment-alt"></i></a>
+                                    <a href="{% url 'message' e.1 %}/"><i class="far fa-comment-alt"></i></a>
                                 </li>
                             {% endfor %}
                         </ul>
