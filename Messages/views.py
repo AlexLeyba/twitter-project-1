@@ -216,3 +216,15 @@ def message_delete(request, id_article):
     cursor.execute("UPDATE `user_messages` SET `right` = `right` - 2 WHERE `right` > " + str(right))
 
     return redirect('/')
+
+
+def test(request):
+
+    row = Trees.objects.get(pk=1)
+    content_type = ContentType.objects.get_for_model(row)
+    obj_list = UserMessages.objects.filter(content_type__pk=content_type.pk,
+                                    object_id=row.pk)
+    context = {
+        'context': obj_list.values()
+    }
+    return render(request, 'test.html', context)

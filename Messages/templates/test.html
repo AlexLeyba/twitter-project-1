@@ -1,10 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'main/template.html' %}
 
-</body>
-</html>
+{% block content %}
+    {% for row in context %}
+        {{ row.text }}<br>
+    {% endfor %}
+{% endblock %}

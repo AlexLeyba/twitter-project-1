@@ -1,5 +1,5 @@
-from django.shortcuts import render, redirect, HttpResponse
-from Messages.models import UserMessages, Likes
+from django.shortcuts import render, redirect, HttpResponse, get_object_or_404
+from Messages.models import UserMessages, Likes, ContentType, Musician, Album, Trees
 from django.core.paginator import Paginator
 from django.contrib.auth.models import User, Group
 from django.conf import settings
