@@ -15,5 +15,5 @@ urlpatterns = [
     re_path('^message/(?P<id_article>\w+)/$', views.message, name="message"),
     re_path('^profile/(?P<id_user>\w+)/$', views.profile, name="profile"),
     re_path('^message_delete/(?P<id_article>\w+)/$', views.message_delete, name="message_delete"),
-    path('test/', views.test),
+    # path('test/', views.test),
 ]

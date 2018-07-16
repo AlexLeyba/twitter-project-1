@@ -6,7 +6,8 @@ def main_page(request, page_number=1):
     calculate_likes()
     like = get_conf_likes(request)
     edit = get_edit_art(request)
-    all = UserMessages.objects.filter(~Q(id_user=0))
+    # all = UserMessages.objects.filter(~Q(id_user=0))
+    all = get_messages(1)
 
     obj_list = get_big_arr(like, edit, all)
     current_page = Paginator(obj_list, 4)
@@ -77,7 +78,8 @@ def check_from_email(request, user):
 
 
 def user_messages(request, id_us, ed=False):
-    all_articles = UserMessages.objects.filter(id_user=id_us)
+    # all_articles = UserMessages.objects.filter(id_user=id_us)
+    all_articles = get_messages(1).filter(id_user=id_us)
 
     context = {
         'articles': all_articles,
@@ -90,11 +92,12 @@ def user_messages(request, id_us, ed=False):
 def user_messages_edit(request, id_us, ed=True, id_article=None):
     text = request.GET.get('change_message', '')
     if text != '':
-        art = UserMessages.objects.get(id=id_article)
+        # art = UserMessages.objects.get(id=id_article)
+        art = get_messages(1).get(id=id_article)
         art.text = text
         art.save()
-    all_articles = UserMessages.objects.filter(id_user=id_us)
-    text_message = UserMessages.objects.filter(id=id_article).values_list()
+    all_articles = get_messages(1).objects.filter(id_user=id_us)
+    text_message = get_messages(1).objects.filter(id=id_article).values_list()
 
     context = {
         'articles': all_articles,
@@ -124,7 +127,8 @@ def user_add_like(request, id_article):
 
 def user_retweet(request, id_article, id_creater):
     user = str(request.user)
-    mess = UserMessages.objects.get(id=id_article, id_user=id_creater)
+    # mess = UserMessages.objects.get(id=id_article, id_user=id_creater)
+    mess = get_messages(1).get(id=id_article, id_user=id_creater)
     text_message = 'User ' + user + ' retweeted: "' + mess.text + '"'
     add_new_message(request, text_message, id_article)
     return redirect('/')
@@ -132,7 +136,7 @@ def user_retweet(request, id_article, id_creater):
 
 def message(request, id_article):
     answer = request.GET.get('answer', '')
-    mess = UserMessages.objects
+    mess = get_messages(1)
     cursor = connection.cursor()
 
     create_message(request, answer, mess, id_article)
@@ -208,7 +212,7 @@ def profile(request, id_user):
 
 
 def message_delete(request, id_article):
-    mess = UserMessages.objects.get(id=id_article)
+    mess = get_messages(1).get(id=id_article)
     right = mess.right
     mess.delete()
     cursor = connection.cursor()
@@ -217,14 +221,24 @@ def message_delete(request, id_article):
 
     return redirect('/')
 
+#
+# def test(request):
+#
+#     row = Trees.objects.get(pk=1)
+#     content_type = ContentType.objects.get_for_model(row)
+#     obj_list = UserMessages.objects.filter(content_type__pk=content_type.pk,
+#                                     object_id=row.pk)
+#     context = {
+#         'context': obj_list.values()
+#     }
+#     return render(request, 'test.html', context)
 
-def test(request):
 
-    row = Trees.objects.get(pk=1)
+def get_messages(pk_id):
+
+    row = Trees.objects.get(pk=pk_id)
     content_type = ContentType.objects.get_for_model(row)
-    obj_list = UserMessages.objects.filter(content_type__pk=content_type.pk,
-                                    object_id=row.pk)
-    context = {
-        'context': obj_list.values()
-    }
-    return render(request, 'test.html', context)
+    obj_list = UserMessages.objects.filter(~Q(id_user=0),
+                                           content_type__pk=content_type.pk,
+                                            object_id=row.pk, )
+    return obj_list

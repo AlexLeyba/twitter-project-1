@@ -17,6 +17,7 @@
                     {% endif %}
                 </div>
                 <form action="" method="get" role="form">
+{#                    {% csrf_token %}#}
                     <div class="row bg-info" style="padding: 30px;">
                         {% if answer_to_username != '' %}
                             <input type="text" name="answer" class="form-control mr-sm-2" placeholder="reply to {{ answer_to_username }}">
